@@ -4,10 +4,13 @@ from googleapiclient.discovery import build
 from google.auth.transport.requests import Request
 from google.oauth2.credentials import Credentials
 from google_auth_oauthlib.flow import InstalledAppFlow
+from dotenv import load_dotenv
+
+load_dotenv('.env')
 
 # Scopes richiesti per accedere a Google Calendar
 SCOPES = ["https://www.googleapis.com/auth/calendar"]
-OAUTH2_KEY = "/Users/stomycraft/Documents/myPythonCode/IBMHack/desktop-client_secret_690889704678-5lml5g9dfva4hk1eugmhkbpn5atpnb8c.apps.googleusercontent.com.json"
+OAUTH2_KEY = os.getenv("GOOGLE_OAUTH2_JSON_PATH", "desktop-client_secret_690889704678-5lml5g9dfva4hk1eugmhkbpn5atpnb8c.apps.googleusercontent.com.json")
 
 # Autentica l'utente con OAuth 2.0 e restituisce il servizio Google Calendar API.
 def authenticate_google():
@@ -136,7 +139,7 @@ if __name__ == "__main__":
     '''
     #Test - find an available slot among team members
     service = authenticate_google()
-    calendar_ids = ["nicola.caione@gmail.com", "chiovelli.alessio@gmail.com"]
+    calendar_ids = [""]
     slot = find_first_available_slot(service, calendar_ids)
 
     if slot:
@@ -145,13 +148,14 @@ if __name__ == "__main__":
         print("No slot found in the next 7 days")
 
     '''
-    #Test - schdule a meeting
-    meeting_id = ScheduleMeeting(
-        subject="Project Kickoff Meeting",
-        agenda="Discuss project progress and upcoming tasks.",
-        start_date="2025-02-22T16:30:00",
-        end_date="2025-02-22T17:30:00",
-        participants=["nicola.caione@gmail.com", "chiovelli.alessio@gmail.com"]
-    )
-    print("Meeting ID:", meeting_id)
+    # #Test - schdule a meeting
+    # meeting_id = ScheduleMeeting(
+    #     subject="Project Kickoff Meeting",
+    #     agenda="Discuss project progress and upcoming tasks.",
+    #     start_date="2025-02-22T16:30:00",
+    #     end_date="2025-02-22T17:30:00",
+    #     participants=[""]
+    # )
+    # print("Meeting ID:", meeting_id)
+    find_first_available_slot(authenticate_google())
    # '''
