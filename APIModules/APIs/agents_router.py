@@ -32,3 +32,15 @@ async def explain_agents(request : PromptRequest):
                     for action in actions
                 ]),
         }
+
+@base_router.post("/creare_call")
+async def create_call(request : PromptRequest):
+    return {
+        "message" : "stai creando una call",
+    }
+
+@base_router.post("/upload_call")
+async def upload_call(request : PromptRequest):
+    return {
+        "message" : "hai caricato",
+    }

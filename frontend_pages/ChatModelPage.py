@@ -1,8 +1,6 @@
 from . import os, st, re, requests
 from .BasePage import BasePage
 
-from .modals import modal_function, modal_function_2
-
 class RouterAgent:
     def __call__(self, **kwargs):
         agent_prompt_slash_code = re.findall(r"(\/[\w\-_]*)? *(.*)", kwargs.get('prompt'))
@@ -24,11 +22,10 @@ class ChatModelPage(BasePage):
         self.router_agent = RouterAgent()
 
     def render(self):
+        st.title("Echo Bot")
         super().render({"WATSON_API_KEY": os.getenv("WATSON_API_KEY")})
         self.init_messages()
         self.reset_messages_sidebar_button()
-        self.upfront_page()
-        st.title("Echo Bot")
         # Display chat messages from history on app rerun
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
@@ -50,21 +47,28 @@ class ChatModelPage(BasePage):
         if "messages" not in st.session_state:
             st.session_state.messages = []
     
+    def get_agent_response(self, **kwargs):
+        # Get agent response
+        return self.router_agent(**kwargs)
+
+    def reset_messages_sidebar_button(self):
+        with st.sidebar:
+            # Reset chat history
+            if st.button("Reset chat"):
+                st.session_state.messages = []
+
     # def choose_agent(self):
     #     # Choose agent
     #     class RouterAgent:
-            
     #         def __call__(self, **kwargs):
     #             agent_prompt_slash_code = re.findall(r"(\/[\w\-_]*) *(.*)", kwargs.get('prompt'))
     #             uri = agent_prompt_slash_code[0][0]
     #             prompt = agent_prompt_slash_code[0][1]
-
     #             response = requests.post(os.getenv("BACKEND_URL") + f'/{uri}', json = {"prompt" : prompt})
     #             if response.status_code != 200:
     #                 st.error(f"Error: {response.text}")
     #                 return
     #             return response.json()
-
     #     # agents = {
     #     #     "Dummy Agent": {
     #     #         "_class" : RouterAgent,
@@ -78,23 +82,3 @@ class ChatModelPage(BasePage):
     #     RouterAgent()
     #     agent_class = agent_init_js.pop("_class")
     #     return agent_class(**agent_init_js)
-    
-    def get_agent_response(self, **kwargs):
-        # Get agent response
-        return self.router_agent(**kwargs)
-
-    def reset_messages_sidebar_button(self):
-        with st.sidebar:
-            # Reset chat history
-            if st.button("Reset chat"):
-                st.session_state.messages = []
-
-    def upfront_page(self):
-        tabs_and_dialogs_cols = st.columns(2)
-        with tabs_and_dialogs_cols[0]:
-            if st.button("Modal 1"):modal_function()
-            if st.button("Modal 2"):modal_function_2()
-        with tabs_and_dialogs_cols[1]:
-            tabs = st.tabs(["Tab 1", "Tab 2", "Tab 3"])
-            for tab_idx, tab in enumerate(tabs):
-                with tab:st.image(f'./assets/{tab_idx+1}.png')
