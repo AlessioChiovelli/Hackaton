@@ -171,3 +171,9 @@ cython_debug/
 .pypirc
 
 .streamlit/
+.vscode/
+assets/1.png
+assets/2.png
+assets/3.png
+moc_minuta.txt
+moc_transcript.txt

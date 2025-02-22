@@ -6,4 +6,4 @@ PAGES = {
 }
 
 if __name__ == "__main__":
-    PAGES[st.selectbox("Select a page", list(PAGES.keys()))]().render()
+    PAGES[st.sidebar.selectbox("Select a page", list(PAGES.keys()))]().render()
