@@ -1,7 +1,5 @@
 ![PM AI Logo](Logo.jpeg)
 
-Check out the configuration reference at https://huggingface.co/docs/hub/spaces-config-reference
-
 # PM AI – Your Smart AI-driven Project Assistant
 ## Overview
 
