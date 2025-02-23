@@ -15,7 +15,13 @@ class BasePage(ABC):
 
     @abstractmethod
     def render(self, keys : dict[str, str | None], **kwargs):
-        with st.sidebar:
+        if kwargs.get('on_sidebar', False):
+            with st.sidebar:
+                st.title("API Key Input")
+                for key, default_value in keys.items():
+                    st.session_state[key] = st.text_input(f"Enter API key for {key}", value=default_value, type="password")
+                st.divider()
+        else:
             st.title("API Key Input")
             for key, default_value in keys.items():
                 st.session_state[key] = st.text_input(f"Enter API key for {key}", value=default_value, type="password")
