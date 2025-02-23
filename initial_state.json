@@ -1,9 +1,10 @@
 {
   "team": [
-    "Joy",
-    "Alessio",
-    "Nicola",
-    "Dragos"
+    "joyciliani@gmail.com",
+    "chiovelli.alessio@gmail.com",
+    "Nicola.caione@gmail.com",
+    "nicola.decuzzi.nd@gmail.com",
+    "dragos.baicu@edu.unifi.it"
   ],
   "tasks": [
     {
@@ -57,23 +58,23 @@
   ],
   
   "assignments": {
-    "Joy": [
+    "joyciliani@gmail.com": [
       "UX/UI design",
       "Script video",
       "Presentation design"
     ],
-    "Alessio": [
+    "chiovelli.alessio@gmail.com": [
       "UX/UI coding",
       "AI agents design",
       "AI agents coding"
     ],
-    "Nicola": [
+    "Nicola.caione@gmail.com": [
       "AI agents design",
       "AI agents coding",
       "Script video",
       "Presentation design"
     ],
-    "Dragos": [
+    "dragos.baicu@edu.unifi.it": [
       "Video making"
     ]
   }

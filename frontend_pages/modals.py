@@ -29,7 +29,7 @@ def create_call_modal():
     for col, button in zip(cols, buttons): 
         with col:
             if st.button(button[0]):
-                button[1]()
+                button[1](prompt)
 
 @st.dialog("Upload a Call")
 def upload_call_modal_and_actions():

@@ -74,7 +74,10 @@ def ScheduleMeeting(subject: str, agenda: str, start_date: str, end_date: str, p
         ).execute()
 
         print(f"✅ Meeting created with ID: {event.get('id')}")
-        return event.get("id")
+        return "Evento creato con successo!" "\n".join([
+            f'\t{subject}', 
+            f'\t{agenda}', f'\t{start_date}', f'\t{end_date}', "\n".join(["Partecipants", *list(map(lambda x : f'\t{x}', participants))])
+        ])
 
     except Exception as e:
         print(f"❌ Error creating event: {e}")
@@ -157,5 +160,5 @@ if __name__ == "__main__":
     #     participants=[""]
     # )
     # print("Meeting ID:", meeting_id)
-    find_first_available_slot(authenticate_google())
+    authenticate_google()
    # '''

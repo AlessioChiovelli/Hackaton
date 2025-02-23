@@ -65,8 +65,8 @@ class Dashboard(BasePage):
         # st.image("static/2.png")
 
     def tasks(self):
-        st.image("static/3.png")
+        st.write("Tasks")
 
     def projects(self):
-        projects_available = ["Projects", "Projects2", "Projects3"]
-        st.session_state.selected_project = st.selectbox("Projects available", projects_available)
+        st.header("IBM-Granite-Hackaton")
+        st.divider()

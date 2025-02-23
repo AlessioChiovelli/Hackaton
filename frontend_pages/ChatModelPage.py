@@ -13,7 +13,13 @@ class RouterAgent:
         agent_prompt_slash_code = re.findall(r"(\/[\w\-_]*)? *(.*)", kwargs.get('prompt'))
         uri = agent_prompt_slash_code[0][0] or "/explain"
         prompt = agent_prompt_slash_code[0][1]
+        if (memory:=kwargs.get("memory")) and len(memory)>1:
+            prompt = f"{memory}\n\nLAST_QUESTION:\n{prompt}"
         print(f'{uri = }', f'{prompt = }')
+
+        if uri == "/propose_project_meeting":
+            prompt = st.session_state.status_table
+
         func_to_call = APIS.get(uri, explain_agents)
         response = func_to_call(
             PromptRequest(prompt = prompt) 
@@ -56,7 +62,7 @@ class ChatModelPage(BasePage):
             st.chat_message("user").markdown(prompt)
             # Add user message to chat history
             st.session_state.messages.append({"role": "user", "content": prompt})
-            response = self.get_agent_response(prompt = prompt)
+            response = self.get_agent_response(prompt = prompt, memory = st.session_state.messages)
             # Display assistant response in chat message container
             with st.chat_message("assistant"):st.markdown(response)
             # Add assistant response to chat history
@@ -68,8 +74,28 @@ class ChatModelPage(BasePage):
             st.session_state.messages = []
     
     def get_agent_response(self, **kwargs):
+        def format_memory(messages):
+            """
+            Transforms a list of message dictionaries into a formatted string.
+
+            Args:
+                messages (list): A list of dictionaries, each with keys "role" and "content".
+
+            Returns:
+                str: A formatted string where each message is preceded by its role.
+            """
+            formatted_lines = []
+            for msg in messages:
+                role = msg.get("role", "").capitalize()  # Ensures "user" -> "User", "assistant" -> "Assistant"
+                content = msg.get("content", "")
+                formatted_lines.append(f"{role}:\n{content}")
+            # Join each message block with an extra newline between conversations.
+            return "\n\n".join(formatted_lines)
         # Get agent response
-        return self.router_agent(**kwargs)
+        memory = kwargs.get("memory", "")
+        if memory:
+            kwargs["memory"] = format_memory(memory)
+        return self.router_agent(prompt = kwargs.get("prompt", ""), memory = memory)
 
     def reset_messages_sidebar_button(self):
         with st.sidebar:
@@ -139,7 +165,20 @@ class ChatModelPage(BasePage):
 
     def tasks(self):
         tasks = st.session_state.tasks
+        assignments : dict = st.session_state.assignments
+        tasks_by_person = {}
+
         df = pd.DataFrame(tasks)
+        df.rename(columns = {"name" : "Task"}, inplace = True)
+        for person, tasks in assignments.items():
+            for task in tasks:
+                if task not in tasks_by_person:
+                    tasks_by_person[task] = []
+                tasks_by_person[task].append(person)
+        tasks_by_person = [{ "Task" : task , "Team Member" : ", ".join(people) } for task, people in tasks_by_person.items()]
+        df_tasks_persons = pd.DataFrame(tasks_by_person)
+        df = pd.merge(df, df_tasks_persons,  how = "inner")
+        st.session_state.status_table = df.to_json(orient = "records")
         st.dataframe(df)
 
     def assignments(self):

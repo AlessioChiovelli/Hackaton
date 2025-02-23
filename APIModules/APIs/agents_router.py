@@ -1,8 +1,9 @@
+import json
 from typing import Any, List
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
-from APIModules.AIAgents.MeetingSchedulerAgent import MeetingSchedulerAgent
+from APIModules.AIAgents.MeetingSchedulerAgent import ProposerMeetingSchedulerAgent, MeetingSchedulerAgentFromTable as MeetingSchedulerAgent
 from APIModules.AIAgents.TranscriptQAAgent import TranscriptQAAgent
 from google_calendar import ScheduleMeeting
 
@@ -12,8 +13,13 @@ class PromptRequest(BaseModel):
     prompt: str
 
 
-@base_router.post("/call")
+@base_router.post("/propose_project_meeting")
+def propose_call(request : PromptRequest):
+    return json.dumps(ProposerMeetingSchedulerAgent()(request.prompt))
+
+@base_router.post("/send_call")
 def create_call(request : PromptRequest):
+    # return json.dumps(MeetingSchedulerAgent()(request.prompt))
     return ScheduleMeeting(**MeetingSchedulerAgent()(request.prompt))
 
 class TranscriptRequest(BaseModel):
@@ -85,6 +91,8 @@ def explain_agents(request : PromptRequest):
 APIS = {
     "" : explain_agents, 
     "/explain" : explain_agents, 
+    "/propose_project_meeting" : propose_call,
+    "/send_call" : create_call,
     "/call" : create_call,
     "/transcript_qa" : transcript_qa, 
     "/tasks_from_transcript" : transcript_qa, 
