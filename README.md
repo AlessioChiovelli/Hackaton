@@ -25,6 +25,8 @@ Next, if you type /call, the system will send the google calendar invitation by 
 
 Also, by typing /transcript_qa, and loading a transcript of a videocall, you can ask questions about the meeting.
 
+[See the demo here](https://drive.google.com/file/d/1siE9V999jLxHnroYAjs7MidB1Cif4TH7/view?usp=drivesdk)
+
 ## Key Features
 
 - **Automated Meeting Scheduling:**  
@@ -96,14 +98,3 @@ To get started with PM AI:
 1. **Clone the Repository:**
    ```bash
    git clone https://github.com/yourusername/pm-ai.git
-
----
-title: Test
-emoji: 🏢
-colorFrom: blue
-colorTo: gray
-sdk: streamlit
-sdk_version: 1.42.2
-app_file: app.py
-pinned: false
----
