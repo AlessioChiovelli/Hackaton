@@ -1,13 +1,16 @@
-from fastapi import FastAPI
+from frontend_pages import st
+from frontend_pages.ConfigPage import ConfigPage
+from frontend_pages.ChatModelPage import ChatModelPage
+from frontend_pages.Dashboard import Dashboard
 
-from APIModules.APIs.agents_router import base_router
-import uvicorn
+st.set_page_config(layout="wide")
 
-app = FastAPI()
-
-app.include_router(base_router)
+PAGES = {
+    "Configurazione": ConfigPage,
+    "Dashboard": ChatModelPage,
+    # "Dashboard": Dashboard,
+}
 
 if __name__ == "__main__":
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
-    
+    PAGES[st.sidebar.selectbox("Select a page", list(PAGES.keys()))]().render()
+    # PAGES["Chat with AI Model"]().render()
