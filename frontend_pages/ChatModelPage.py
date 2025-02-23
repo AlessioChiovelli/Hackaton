@@ -1,4 +1,5 @@
 from . import os, APIS, st, re, json, requests, pd, PromptRequest, TranscriptRequest, UpdateTasksFromTranscriptRequest, explain_agents, stylable_container
+from APIModules.ObjectModels.Task import Task
 from .BasePage import BasePage
 
 from .modals import (
@@ -121,6 +122,20 @@ class ChatModelPage(BasePage):
         super().__init__()
         self.model = None
         self.router_agent = RouterAgent()
+        with st.sidebar:
+            initial_state_from_json : dict = st.session_state.get("INITIAL_STATE", {})
+            if st.button("use_preloaded_state"):
+                with open("initial_state.json") as f:
+                    initial_state_from_json : dict = json.load(f)
+                    st.session_state.INITIAL_STATE = initial_state_from_json
+                    st.rerun()
+            initial_team_members = st.session_state.get('team')
+            if not initial_team_members:st.session_state.team = initial_state_from_json.get('team', ["Alessio", "Joy", "Nicola C", "Nicola D", "Dragosh"])
+            initial_tasks = st.session_state.get('tasks')
+            if not initial_tasks:st.session_state.tasks = [Task(**task).model_dump() for task in initial_state_from_json.get('tasks', [])]
+            initial_assignments = st.session_state.get('assignments')
+            if not initial_tasks:st.session_state.assignments = initial_state_from_json.get('assignments', {})
+
 
     def render(self):
         st.title("Dashboard")

@@ -4,6 +4,8 @@ from .BasePage import BasePage
 from .modals import get_base64_image, create_call_modal, upload_call_modal_and_actions
 
 class Dashboard(BasePage):
+
+    
     def render(self):
         st.title("Dashboard")
         self.sidebar_elements()
