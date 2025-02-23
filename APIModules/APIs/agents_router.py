@@ -1,10 +1,11 @@
 import json
+import re
 from typing import Any, List
 from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from APIModules.AIAgents.MeetingSchedulerAgent import ProposerMeetingSchedulerAgent, MeetingSchedulerAgentFromTable as MeetingSchedulerAgent
-from APIModules.AIAgents.TranscriptQAAgent import TranscriptQAAgent
+from APIModules.AIAgents.TranscriptQAAgent import TranscriptQAAgent, UpdateTaskFromTranscriptQAAgent
 from google_calendar import ScheduleMeeting
 
 base_router = APIRouter()
@@ -56,6 +57,18 @@ def transcript_qa(request : TranscriptRequest):
 #         # restituisci un messaggio d'errore
 #         raise HTTPException(status_code=400, detail=str(e))
 
+class UpdateTasksFromTranscriptRequest(BaseModel):
+    table: str
+    transcript: str
+
+@base_router.post("/update_tasks_from_transcript")
+def mod_tasks_from_transcript(request : UpdateTasksFromTranscriptRequest):
+
+    output_json_str :str = UpdateTaskFromTranscriptQAAgent()(**request.model_dump())
+    output_json_str = re.sub(r'\[json\]', '', output_json_str)
+    return json.loads(output_json_str)
+
+
 @base_router.post("/explain")
 def explain_agents(request : PromptRequest):
     actions = [
@@ -96,4 +109,5 @@ APIS = {
     "/call" : create_call,
     "/transcript_qa" : transcript_qa, 
     "/tasks_from_transcript" : transcript_qa, 
+    "/update_tasks_from_transcript" : mod_tasks_from_transcript, 
 }

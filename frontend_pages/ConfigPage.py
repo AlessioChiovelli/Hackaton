@@ -9,7 +9,8 @@ class ConfigPage(BasePage):
 
     def render(self):
         super().render(keys={"WATSON_API_KEY": os.getenv("WATSON_API_KEY")})
-        with open("initial_state.json") as f:initial_state_from_json : dict = json.load(f)
+        initial_state_from_json : dict = {}
+        # with open("initial_state.json") as f:initial_state_from_json : dict = json.load(f)
         initial_team_members = st.session_state.get('team')
         if not initial_team_members:st.session_state.team = initial_state_from_json.get('team', ["Alessio", "Joy", "Nicola C", "Nicola D", "Dragosh"])
         initial_tasks = st.session_state.get('tasks')

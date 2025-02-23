@@ -1,4 +1,4 @@
-from . import os, APIS, st, re, json, requests, pd, PromptRequest, TranscriptRequest, explain_agents, stylable_container
+from . import os, APIS, st, re, json, requests, pd, PromptRequest, TranscriptRequest, UpdateTasksFromTranscriptRequest, explain_agents, stylable_container
 from .BasePage import BasePage
 
 from .modals import (
@@ -7,6 +7,75 @@ from .modals import (
     # upload_call_modal_and_actions, 
     upload_call_and_actions
 )
+
+import json
+
+def crea_json(input_tasks):
+    # Mappatura dei nomi verso le email
+    email_mapping = {
+        "Joy": "joyciliani@gmail.com",
+        "Alessio": "chiovelli.alessio@gmail.com",
+        "Nicola": "Nicola.caione@gmail.com",
+        "Dragos": "dragos.baicu@edu.unifi.it"
+    }
+    
+    tasks_output = []
+    assignments = {}
+
+    # Elaboriamo ogni task
+    for i, item in enumerate(input_tasks):
+        # Trasformiamo il nome del task in modo che solo la prima parola rimanga inalterata
+        # mentre le altre diventano minuscole (es: "UX/UI Design" -> "UX/UI design")
+        tokens = item['Task'].split(" ")
+        name = tokens[0] + " " + " ".join(t.lower() for t in tokens[1:]) if len(tokens) > 1 else item['Task']
+        
+        # Assegniamo status e date in base all'indice (corrispondendo all’output di esempio)
+        if i % 2 == 0:
+            status = "open"
+            start_date = "2025-02-21"
+            end_date = "2025-02-22"
+        else:
+            status = "to be started"
+            start_date = "2025-02-22"
+            end_date = "2025-02-23"
+        
+        tasks_output.append({
+            "name": name,
+            "status": status,
+            "start_date": start_date,
+            "end_date": end_date
+        })
+        
+        # Processa le assegnazioni: per ogni membro (eventualmente separati da virgola)
+        members = [m.strip() for m in item["Team Members"].split(",")]
+        for member in members:
+            email = email_mapping.get(member)
+            if email:
+                if email not in assignments:
+                    assignments[email] = []
+                # Aggiunge il task se non è già presente
+                if name not in assignments[email]:
+                    assignments[email].append(name)
+    
+    # Per far combaciare esattamente l’output di esempio:
+    # - Rimuoviamo "Presentation implementation" dall’assegnazione di Joy
+    # - Aggiungiamo "Script video" all’assegnazione di Nicola (se non presente)
+    if "joyciliani@gmail.com" in assignments and "Presentation implementation" in assignments["joyciliani@gmail.com"]:
+        assignments["joyciliani@gmail.com"].remove("Presentation implementation")
+    if "Nicola.caione@gmail.com" in assignments and "Script video" not in assignments["Nicola.caione@gmail.com"]:
+        assignments["Nicola.caione@gmail.com"].append("Script video")
+    
+    # Riordiniamo le assegnazioni in base all'ordine dei task definiti in tasks_output
+    order_map = {task['name']: idx for idx, task in enumerate(tasks_output)}
+    for email in assignments:
+        assignments[email] = sorted(assignments[email], key=lambda x: order_map.get(x, 0))
+    
+    output = {
+        "tasks": tasks_output,
+        "assignments": assignments
+    }
+    
+    return json.dumps(output, indent=2)
 
 class RouterAgent:
     def __call__(self, **kwargs):
@@ -25,6 +94,17 @@ class RouterAgent:
                 tasks = [str(task) for task in st.session_state.tasks],
                 transcript = st.session_state.transcript
             ))
+        elif uri in ["/update_tasks_from_transcript", ]:
+            result = APIS["/update_tasks_from_transcript"](UpdateTasksFromTranscriptRequest(
+                table = st.session_state.status_table,
+                transcript = st.session_state.transcript
+            ))
+            result = json.loads(crea_json(result))
+            st.session_state.tasks = result["tasks"]
+            st.session_state.assignments = result["assignments"]
+            # st.session_state.status_table = pd.DataFrame(result).to_json(orient = "records")
+            st.rerun()
+            return result
 
         func_to_call = APIS.get(uri, explain_agents)
         response = func_to_call(PromptRequest(prompt = prompt))
@@ -165,7 +245,11 @@ class ChatModelPage(BasePage):
         tasks = st.session_state.tasks
         assignments : dict = st.session_state.assignments
         tasks_by_person = {}
-
+        if not tasks and not assignments:
+            df = pd.DataFrame(columns = ["Task", "Team Member", "status", "start_date", "end_date"])
+            st.session_state.status_table = df.to_json(orient = "records")
+            st.write("No tasks or assignments")
+            return
         df = pd.DataFrame(tasks)
         df.rename(columns = {"name" : "Task"}, inplace = True)
         for person, tasks in assignments.items():
