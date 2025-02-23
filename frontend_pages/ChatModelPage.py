@@ -135,7 +135,7 @@ class ChatModelPage(BasePage):
             with st.chat_message(message["role"]):
                 st.markdown(message["content"])
         # React to user input
-        if prompt := st.chat_input("What is up?"):
+        if prompt := st.chat_input("type 'commands' or 'explain' to see the available commands"):
             # Display user message in chat message container
             st.chat_message("user").markdown(prompt)
             # Add user message to chat history
