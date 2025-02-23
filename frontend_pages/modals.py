@@ -58,13 +58,10 @@ def upload_call_and_actions():
         accept_multiple_files=False
     )
     transcript_text = get_transcript_text(uploaded_file) if uploaded_file else ""
-    buttons = {
-        # "Crea minuta": minuta_action_from_uploaded_call, 
-        # "Genera trascritto": transcript_action_from_uploaded_call, 
-        "QA from transcripts": partial(qa_from_transcripts, Transcript = transcript_text), 
-        "Generate Tasks from transcript": partial(create_tasks_action_from_uploaded_call_transcript, Transcript = transcript_text), 
-    }
-    _ = buttons[st.selectbox("Choose an action", buttons.keys())]()
+    st.session_state.transcript = transcript_text
+    if os.getenv("DEBUG_MODE", True):
+        with st.expander("Transcript"):
+            st.text_input("", value = transcript_text)
                 
 def minuta_action_from_uploaded_call():
     if st.button("Crea minuta"):
