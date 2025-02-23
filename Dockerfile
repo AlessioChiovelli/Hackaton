@@ -18,7 +18,4 @@ COPY app.py                     /app/app.py
 COPY google_calendar.py         /app/google_calendar.py
 COPY main.sh                    /app/main.sh
 
-EXPOSE 5000
-EXPOSE 8501
-
-CMD ["sh", "main.sh"]
+CMD ["streamlit", "run", "streamlit_app.py"]
