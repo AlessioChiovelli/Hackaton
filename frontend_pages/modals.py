@@ -3,7 +3,7 @@ import docx
 from PyPDF2 import PdfFileReader
 import io
 
-from . import st, base64, os, requests, partial
+from . import st, base64, os, requests, partial, PromptRequest, APIS
 from .load_css import render_css
 
 st.markdown(f'<style></style>', unsafe_allow_html=True)
@@ -14,12 +14,16 @@ def get_base64_image(image_path : str):
     
 @st.dialog("Create a Call")
 def create_call_modal():
-    st.multiselect("People", ["Alice", "Bob", "Charlie"])
-    st.multiselect("Tasks", ["Task 1", "Task 2", "Task 3"])
-    st.text_area("Prompt")
+    team_members_selected = st.multiselect("People", options = st.session_state.team)
+    tasks_selected = st.multiselect("Tasks", options = filter(lambda task: task['status'] not in ["to be started", "finished"], st.session_state.tasks))
+    prompt = st.text_area("Prompt", value = "\n\n".join(
+        [
+            "\n".join(["Team Members:", *map(lambda x : f'\t{x}', team_members_selected)]),
+            "\n".join(["Tasks:", *[str(task) for task in tasks_selected]]),
+        ]
+    ))
     buttons = [
-        ("submit", lambda _ : st.balloons()), 
-        ("cancel", lambda _ : st.balloons())
+        ("submit", lambda prompt : APIS['/call'](PromptRequest(prompt = prompt))), 
     ]
     cols = st.columns(len(buttons))
     for col, button in zip(cols, buttons): 
@@ -29,6 +33,23 @@ def create_call_modal():
 
 @st.dialog("Upload a Call")
 def upload_call_modal_and_actions():
+    uploaded_file = st.file_uploader(
+        # "Import a videocall recording or its transcripts", 
+        "Import a videocall recording transcript", 
+        type=['.txt', '.doc', '.docx', '.pdf'],
+        # type=['.txt', '.doc', '.docx', '.pdf', '.mp4', '.wav', '.flac'],
+        accept_multiple_files=False
+    )
+    transcript_text = get_transcript_text(uploaded_file) if uploaded_file else ""
+    buttons = {
+        # "Crea minuta": minuta_action_from_uploaded_call, 
+        # "Genera trascritto": transcript_action_from_uploaded_call, 
+        "QA from transcripts": partial(qa_from_transcripts, Transcript = transcript_text), 
+        "Generate Tasks from transcript": partial(create_tasks_action_from_uploaded_call_transcript, Transcript = transcript_text), 
+    }
+    _ = buttons[st.selectbox("Choose an action", buttons.keys())]()
+
+def upload_call_and_actions():
     uploaded_file = st.file_uploader(
         # "Import a videocall recording or its transcripts", 
         "Import a videocall recording transcript", 

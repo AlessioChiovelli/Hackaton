@@ -1,7 +1,12 @@
-from . import os, st, re, requests, stylable_container
+from . import os, APIS, st, re, json, requests, pd, PromptRequest, TranscriptRequest, explain_agents, stylable_container
 from .BasePage import BasePage
 
-from .modals import get_base64_image, create_call_modal, upload_call_modal_and_actions
+from .modals import (
+    get_base64_image, 
+    create_call_modal, 
+    # upload_call_modal_and_actions, 
+    upload_call_and_actions
+)
 
 class RouterAgent:
     def __call__(self, **kwargs):
@@ -9,13 +14,23 @@ class RouterAgent:
         uri = agent_prompt_slash_code[0][0] or "/explain"
         prompt = agent_prompt_slash_code[0][1]
         print(f'{uri = }', f'{prompt = }')
-        response = requests.post(os.getenv("BACKEND_URL", "http://127.0.0.1:5000") + f'{uri}', json = {"prompt" : prompt})
-        if response.status_code != 200:
-            st.error(f"Error: {response.text}")
-            return
-        response_json = response.json()
-        print(f'{response_json = }')
-        return response_json["message"]
+        func_to_call = APIS.get(uri, explain_agents)
+        response = func_to_call(
+            PromptRequest(prompt = prompt) 
+            if uri != "" else 
+            TranscriptRequest(
+                prompt=prompt, 
+                tasks = json.dumps(self.session_state.tasks),
+                transcript = self.session_state.transcript
+            )
+        )
+        # response = requests.post(os.getenv("BACKEND_URL", "http://127.0.0.1:5000") + f'{uri}', json = {"prompt" : prompt})
+        # if response.status_code != 200:
+        #     st.error(f"Error: {response.text}")
+        #     return
+        # response_json = response.json()
+        # print(f'{response_json = }')
+        return response
 
 class ChatModelPage(BasePage):
     def __init__(self):
@@ -26,9 +41,11 @@ class ChatModelPage(BasePage):
     def render(self):
         st.title("Dashboard")
         self.sidebar_elements()
+        self.sidebar_chat_elements()
         self.upfront_page()
         self.init_messages()
         self.reset_messages_sidebar_button()
+        st.divider()
         # Display chat messages from history on app rerun
         for message in st.session_state.messages:
             with st.chat_message(message["role"]):
@@ -60,9 +77,10 @@ class ChatModelPage(BasePage):
             if st.button("Reset chat"):
                 st.session_state.messages = []
 
-    def upfront_page(self):
-        tabs_and_dialogs_cols = st.columns(2)
-        with tabs_and_dialogs_cols[0]:
+    def sidebar_chat_elements(self):
+        with st.sidebar:
+        # tabs_and_dialogs_cols = st.columns(2)
+        # with tabs_and_dialogs_cols[0]:
             with stylable_container(
                 key = "create-call-button",
                 css_styles = f"""
@@ -94,32 +112,47 @@ class ChatModelPage(BasePage):
                     }}"""
             ):
                 clicked_create_call_button = st.button('', key='upload-call-button')
-            if clicked_create_call_button:upload_call_modal_and_actions()
-        with tabs_and_dialogs_cols[1]:
-            tabs = st.tabs(["Tasks"])
-            func_of_tabs = [ self.tasks ]
-            for tab, func in zip(tabs, func_of_tabs):
-                with tab:func()
+            # if clicked_create_call_button:upload_call_modal_and_actions()
+            if clicked_create_call_button:upload_call_and_actions()
+            # upload_call_and_actions()
+        # with tabs_and_dialogs_cols[1]:
+
+    def upfront_page(self):
+        tabs = st.tabs(["Tasks", "Assignments"])
+        func_of_tabs = [ self.tasks, self.assignments ]
+        for tab, func in zip(tabs, func_of_tabs):
+            with tab:func()
 
     def sidebar_elements(self):
         actions = {"Project" : self.projects, "Team" : self.team }
         with st.sidebar:
-            for label, action in actions.items():
-                st.header(label)
-                action()
-                st.divider()
+            with st.expander("Project"):
+                for idx, (label, action) in enumerate(actions.items(), 1):
+                    st.header(label)
+                    action()
+                    if idx < len(actions):st.divider()
 
     def team(self):
-        teams_per_project = {"Projects": "Team1", "Projects2": "Team2", "Projects3": "Team3"}
-        st.write(teams_per_project[st.session_state.selected_project])
+        for member in st.session_state.team:
+            st.write(member)
         # st.image("static/2.png")
 
     def tasks(self):
-        st.image("static/3.png")
+        tasks = st.session_state.tasks
+        df = pd.DataFrame(tasks)
+        st.dataframe(df)
+
+    def assignments(self):
+        assignments = st.session_state.assignments
+        df = pd.DataFrame([{"Member" : member, "Tasks": ", ".join(
+            map(lambda task : (
+                f":rainbow[{task}]"
+            ), tasks))
+        } for member, tasks in assignments.items()])
+        st.table(df)
 
     def projects(self):
-        projects_available = ["Projects", "Projects2", "Projects3"]
-        st.session_state.selected_project = st.selectbox("Projects available", projects_available)
+        st.subheader("IBM Granite Hackaton")
 
     # def choose_agent(self):
     #     # Choose agent

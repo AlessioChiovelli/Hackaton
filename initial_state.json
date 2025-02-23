@@ -1,0 +1,80 @@
+{
+  "team": [
+    "Joy",
+    "Alessio",
+    "Nicola",
+    "Dragos"
+  ],
+  "tasks": [
+    {
+      "name": "UX/UI design",
+      "status": "open",
+      "start_date": "2025-02-21",
+      "end_date": "2025-02-22"
+    },
+    {
+      "name": "UX/UI coding",
+      "status": "to be started",
+      "start_date": "2025-02-22",
+      "end_date": "2025-02-23"
+    },
+    {
+      "name": "AI agents design",
+      "status": "open",
+      "start_date": "2025-02-21",
+      "end_date": "2025-02-22"
+    },
+    {
+      "name": "AI agents coding",
+      "status": "to be started",
+      "start_date": "2025-02-22",
+      "end_date": "2025-02-23"
+    },
+    {
+      "name": "Script video",
+      "status": "open",
+      "start_date": "2025-02-21",
+      "end_date": "2025-02-22"
+    },
+    {
+      "name": "Video making",
+      "status": "to be started",
+      "start_date": "2025-02-22",
+      "end_date": "2025-02-23"
+    },
+    {
+      "name": "Presentation design",
+      "status": "open",
+      "start_date": "2025-02-21",
+      "end_date": "2025-02-22"
+    },
+    {
+      "name": "Presentation implementation",
+      "status": "to be started",
+      "start_date": "2025-02-22",
+      "end_date": "2025-02-23"
+    }
+  ],
+  
+  "assignments": {
+    "Joy": [
+      "UX/UI design",
+      "Script video",
+      "Presentation design"
+    ],
+    "Alessio": [
+      "UX/UI coding",
+      "AI agents design",
+      "AI agents coding"
+    ],
+    "Nicola": [
+      "AI agents design",
+      "AI agents coding",
+      "Script video",
+      "Presentation design"
+    ],
+    "Dragos": [
+      "Video making"
+    ]
+  }
+}

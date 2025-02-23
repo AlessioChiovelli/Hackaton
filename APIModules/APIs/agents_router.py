@@ -3,7 +3,6 @@ from fastapi import APIRouter, HTTPException
 from pydantic import BaseModel
 
 from APIModules.AIAgents.MeetingSchedulerAgent import MeetingSchedulerAgent
-# from APIModules.AIAgents.SQLAgent import SQLAgent
 from APIModules.AIAgents.TranscriptQAAgent import TranscriptQAAgent
 from google_calendar import ScheduleMeeting
 
@@ -14,16 +13,16 @@ class PromptRequest(BaseModel):
 
 
 @base_router.post("/call")
-async def create_call(request : PromptRequest):
+def create_call(request : PromptRequest):
     return ScheduleMeeting(**MeetingSchedulerAgent()(request.prompt))
 
 class TranscriptRequest(BaseModel):
-    transcript: str = ""
     prompt: str
+    transcript: str = ""
     tasks: list[str] = []
 
-@base_router.post("/transcript")
-async def upload_call(request : TranscriptRequest):
+@base_router.post("/transcript_qa")
+def transcript_qa(request : TranscriptRequest):
     transcript_qa_agent = TranscriptQAAgent()
     return transcript_qa_agent(**{
         'prompt': request.prompt,
@@ -31,6 +30,7 @@ async def upload_call(request : TranscriptRequest):
         'tasks': "\n".join([''] + [f'{task}' for task in request.tasks])
         }
     )
+# from APIModules.AIAgents.SQLAgent import SQLAgent
 
 # class QueryResponse(BaseModel):
 #     sql: str
@@ -51,7 +51,7 @@ async def upload_call(request : TranscriptRequest):
 #         raise HTTPException(status_code=400, detail=str(e))
 
 @base_router.post("/explain")
-async def explain_agents(request : PromptRequest):
+def explain_agents(request : PromptRequest):
     actions = [
         {
             "command" : "/calendar", 
@@ -68,8 +68,7 @@ async def explain_agents(request : PromptRequest):
             ],
         },
     ]
-    return {
-            "message" : "\n".join(
+    return "\n".join(
                 [
                     "You can interact with an agent by simply doing a /{command} {and asking something in the prompt}",
                     "Here's the available agents, commands, actions and some examples:"
@@ -81,6 +80,12 @@ async def explain_agents(request : PromptRequest):
                         [f"    - {example}" for example in action["example-messages"]]
                     )
                     for action in actions
-                ]),
-        }
+                ])
 
+APIS = {
+    "" : explain_agents, 
+    "/explain" : explain_agents, 
+    "/call" : create_call,
+    "/transcript_qa" : transcript_qa, 
+    "/tasks_from_transcript" : transcript_qa, 
+}
