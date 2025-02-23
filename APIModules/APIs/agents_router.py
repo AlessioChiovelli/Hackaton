@@ -74,10 +74,8 @@ def explain_agents(request : PromptRequest):
     actions = [
         {"command" : "/explain", "action" : "explains the available commands", "example-messages" : ["explain"]}
         , {"command" : "/propose_project_meeting", "action" : "Proposes a new meeting by reading the task lists and the transcript in the session so that the user can later on modify the promt and  create a gmeet calendar", "example-messages" : ["/propose_project_meeting"]}
-        , {"command" : "/send_call", "action" : "Creates a new gmeet calendar", "example-messages" : ["/call Create a new call with mail@example.com at 6 PM on 2025-02-22 for 2 hours"]}
         , {"command" : "/call", "action" : "Creates a new gmeet calendar", "example-messages" : ["/call Create a new call with mail@example.com at 6 PM on 2025-02-22 for 2 hours"]}
         , {"command" : "/transcript_qa", "action" : "makes a qa session on the given transcript of a video call", "example-messages" : []}
-        , {"command" : "/tasks_from_transcript", "action" : "updates the transcripts of the page from a command", "example-messages" : ['/tasks_from_transcript']}
         , {"command" : "/update_tasks_from_transcript", "action" : "updates the transcripts of the page from a command", "example-messages" : ['/tasks_from_transcript']}
     ]
     return "\n".join(
