@@ -44,5 +44,5 @@ class ConfigPage(BasePage):
             tasks_selected = [task["name"] for i, task in enumerate(st.session_state.tasks) if i in task_indices]
             if st.button("Assing Task"):
                 st.session_state.assignments[_team_member] = tasks_selected
-        if os.getenv("DEBUG_INITIAL_STATE", True):
+        if os.getenv("DEBUG_INITIAL_STATE", False):
             st.write(st.session_state)
