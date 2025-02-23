@@ -19,17 +19,15 @@ class RouterAgent:
 
         if uri == "/propose_project_meeting":
             prompt = st.session_state.status_table
+        elif uri in ["/transcript_qa", ]:
+            return APIS["/transcript_qa"](TranscriptRequest(
+                prompt=prompt, 
+                tasks = [str(task) for task in st.session_state.tasks],
+                transcript = st.session_state.transcript
+            ))
 
         func_to_call = APIS.get(uri, explain_agents)
-        response = func_to_call(
-            PromptRequest(prompt = prompt) 
-            if uri != "" else 
-            TranscriptRequest(
-                prompt=prompt, 
-                tasks = json.dumps(self.session_state.tasks),
-                transcript = self.session_state.transcript
-            )
-        )
+        response = func_to_call(PromptRequest(prompt = prompt))
         # response = requests.post(os.getenv("BACKEND_URL", "http://127.0.0.1:5000") + f'{uri}', json = {"prompt" : prompt})
         # if response.status_code != 200:
         #     st.error(f"Error: {response.text}")
